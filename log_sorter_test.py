@@ -43,9 +43,21 @@ xsucarr = []
 xautharr = []
 xdeautharr = []
 xclientdeautharr = []
+
+##Set this to the location of all WinSyslog.log files
 folder_path = "C:/Users/arotter/Documents/winsyslog"
 
+
+## adds self made header row to top of array
 xsucarr.append(headers)
+
+
+"""
+get_dir
+use: sets OS directory to folder_path ^^
+     searches through all files in directory to access each .log file
+     calls read_log on each .log file path to read the contents
+"""
 def get_dir():
     global idarr
     os.chdir(folder_path)
@@ -57,18 +69,34 @@ def get_dir():
             print(file_path)
             read_log(file_path)
 
+"""
+read_log
+_logs: .log file path to be read
+use: read log file and call txt_parse on the data split by newline 
+"""
 def read_log(_logs):
     with open(_logs) as f:
         data = f.read().splitlines()
         txt_parse(data)
         
-
+"""
+val_add
+cat: string category to find in header row
+use: given the category name, find index of that category in header row
+return: int index of 
+"""
 def val_add(cat):
     return headers.index(cat)
 
 
 
-
+"""
+field_seperator
+temp_arr: array to be appended with proper categories
+_data: array with data to be appended is in
+use: Check for type=val values and seperates them into proper indexes
+     also checks if type is identity to seperate @rmi.org or RMI/ from username (probably move to other function)
+"""
 def field_seperator(temp_arr, _data):
     
     temp_arr[0:9] = _data[0:9]
@@ -106,7 +134,12 @@ def field_seperator(temp_arr, _data):
         return temp_arr
 
 
-
+"""
+location_short
+loc_long: string
+use: simple function to shorten location to 3 letter abreviation
+(need to add other office locations)
+"""
 def location_short(loc_long):
     if(loc_long.find('BAS') != -1):
         return 'Basalt'
@@ -114,7 +147,12 @@ def location_short(loc_long):
         return 'Boulder'
     else:
         return 'Other'
-
+"""
+event_sorter
+event_data: array of event data to be sorted
+use: sorts given event data into each event type in the 9th index
+(need to add non 8021x events)
+"""
 def event_sorter( event_data):
     each_log = [""]*20
     
@@ -135,7 +173,12 @@ def event_sorter( event_data):
     #else:
         #eventarr.append(event_data)
 
-
+"""
+txt_parse
+_data: array of unchanged Meraki Log data
+use: loop through each log line
+     add Universally Unique ID (UUID) to each record
+"""
 def txt_parse(_data):
 
     for i in _data:
@@ -195,7 +238,3 @@ pd.DataFrame(xsucarr).to_csv('xsuccess_all_test.csv')
 
 
 
-
-
-
-    
