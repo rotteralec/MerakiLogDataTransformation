@@ -145,6 +145,12 @@ def location_short(loc_long):
         return 'Basalt'
     if(loc_long.find('BLD') != -1):
         return 'Boulder'
+    if(loc_long.find('NY') != -1):
+        return 'New York City'
+    if(loc_long.find('DC') != -1):
+        return 'Washington D.C.'
+    if(loc_long.find('OAK') != -1):
+        return 'Oakland'
     else:
         return 'Other'
 """
