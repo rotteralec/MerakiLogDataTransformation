@@ -27,15 +27,6 @@ import os
 
     
     
-""" eventarr = []
-xarr = []
-firewallarr = []
-vpnfirewallarr = []
-flowsarr = []
-ipflowarr = []
-urlarr = []
-otherarr = [] """
-#fieldNames = ("type", 'radio', 'vap')
 counter = 0
 headers = ["uuid", "date", "time", "IP", "6", "7", "8", "location", "log_class", "type", "radio", "vap", "client_mac", "client_ip", "client_ip6", "identity", "aid"]
 idarr = []
@@ -45,7 +36,7 @@ xdeautharr = []
 xclientdeautharr = []
 
 ##Set this to the location of all WinSyslog.log files
-folder_path = "C:/Users/arotter/Documents/winsyslog"
+folder_path = "C:/Users/arotter/Documents/MerakiLogDataTransformation"
 
 
 ## adds self made header row to top of array
@@ -62,7 +53,7 @@ def get_dir():
     global idarr
     os.chdir(folder_path)
     for file in os.listdir():
-        if file.endswith(".log"):
+        if file.endswith("08-30.log"):
             print(idarr)
             idarr = []
             file_path = f"{folder_path}/{file}"
@@ -76,8 +67,9 @@ use: read log file and call txt_parse on the data split by newline
 """
 def read_log(_logs):
     with open(_logs) as f:
-        data = f.read().splitlines()
-        txt_parse(data)
+        for line in f:
+        #data = f.read().splitlines()
+            txt_parse(line)
         
 """
 val_add
@@ -100,7 +92,8 @@ use: Check for type=val values and seperates them into proper indexes
 def field_seperator(temp_arr, _data):
     
     temp_arr[0:9] = _data[0:9]
-    for i in _data[9:]:
+    #print(_data[8:])
+    for i in _data[8:]:
         temp_cat = ""
         temp_val = ""
         equal_ind = -1
@@ -145,6 +138,12 @@ def location_short(loc_long):
         return 'Basalt'
     if(loc_long.find('BLD') != -1):
         return 'Boulder'
+    if(loc_long.find('NY') != -1):
+        return 'New York City'
+    if(loc_long.find('DC') != -1):
+        return 'Washington D.C.'
+    if(loc_long.find('OAK') != -1):
+        return 'Oakland'
     else:
         return 'Other'
 """
@@ -153,17 +152,19 @@ event_data: array of event data to be sorted
 use: sorts given event data into each event type in the 9th index
 (need to add non 8021x events)
 """
-def event_sorter( event_data):
+def event_sorter(event_data):
     each_log = [""]*20
-    
-    if(event_data[9] == "type=8021x_eap_success"):
+    if(event_data[9] == "type=8021x_eap_success"): 
+        #print(event_data)
         each_log = field_seperator(each_log, event_data)
         if(each_log == []):
             return
         else:
             each_log[7] = location_short(each_log[7])
             #del each_log[0:1]
-            xsucarr.append(each_log)
+            print(each_log)
+            xsucarr.append(each_log) 
+            """
     elif(event_data[10] == "type=8021x_auth"):
         xautharr.append(event_data)
     elif(event_data[10] == "type=8021x_client_deauth"):
@@ -171,7 +172,9 @@ def event_sorter( event_data):
     elif(event_data[10] == "type=8021x_deauth"):
         xdeautharr.append(event_data)
     #else:
-        #eventarr.append(event_data)
+        #eventarr.append(event_data) """
+
+
 
 """
 txt_parse
@@ -180,53 +183,41 @@ use: loop through each log line
      add Universally Unique ID (UUID) to each record
 """
 def txt_parse(_data):
-
-    for i in _data:
-        temp = []
-        parts = i.split(',')
-        temp.append(str(uuid.uuid4()))
-        for k in parts[2:7]:
-            temp.append(k)
+    temp = []
+    parts = _data.split(',')
+    #print(parts)
+    parts[7] = parts[7].split(' ')
+    #print(parts)
+    if(parts[7][2]=="events"):
+        for i in parts[7]:
+            parts.append(i)
+   
+        del parts[7]
+        #print(parts)
+        del parts[0:2]
+    
+        parts.insert(0,str(uuid.uuid4()))
+        event_sorter(parts)
+    #print (parts)
+  ## """  for i in _data:
+      #3  temp = []
+      #  parts = i.split(',')
+     #   temp.append(str(uuid.uuid4()))
+      #  print(i) """
         
-        parts[7] = parts[7].split(' ')
-        for k in parts[7]:
-            temp.append(k)
-        if(temp[8] == "events"):
-            event_sorter(temp)
+        #
+        #for k in parts[7]:
+        #if(temp[8] == "events"):
+            #event_sorter(temp)
     
 
 
 get_dir()
-#print(xsucarr)
+#print(xsucarr[0:20])
 
 pd.DataFrame(xsucarr).to_csv('xsuccess_all_test.csv')
 
 #event_sorter(data)
-
-
-""" for i in data:
-    temp = []
-    parts = i.split(',')
-    if(parts[10] == "urls"):
-        urlarr.append(parts)
-
-    elif(parts[10] == "firewall"):
-        firewallarr.append(parts)
-    elif(parts[10] == "flows"):
-        flowsarr.append(parts)
-
-    elif(parts[10] == "vpn_firewall"):
-        vpnfirewallarr.append(parts)
-    elif(parts[10] == "events"):
-        eventarr.append(parts)
-    elif(parts[10] == "ip_flow_start"):
-        ipflowarr.append(parts)
-    elif(parts[10] == "ip_flow_end"):
-        ipflowarr.append(parts)
-    else:
-        otherarr.append(parts)
-     """
-
 
 
 

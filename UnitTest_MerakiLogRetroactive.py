@@ -1,0 +1,1 @@
+CODE_FILE = os.path.join(os.path.dirname("log_sorter_test.py"))

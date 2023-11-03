@@ -36,3 +36,4 @@ Logs/WinSyslog-2023-07-13.log
 Logs/WinSyslog-2023-07-12.log
 Logs/WinSyslog-2023-07-11.log
 Logs/WinSyslog-2023-07-10.log
+*.log
